@@ -6,9 +6,9 @@ from langchain_openai import ChatOpenAI
 pdf_path_folklore = "Folklore articles/"
 pdf_path_scientific = "Scientific articles/"
 prompt_path = "Prompt/idejonaprompt.txt"
-def pipeline(query):
-    vector_db_folklore = create_vector_db(pdf_path_folklore)
-    vector_db_scientific = create_vector_db(pdf_path_scientific)
+vector_db_folklore = create_vector_db(pdf_path_folklore)
+vector_db_scientific = create_vector_db(pdf_path_scientific)
+def pipeline(query):    
     base_url = "http://localhost:1234/v1"
     api_key = "lm-studio"
     llm_model = "gemma-3-1b-it"
