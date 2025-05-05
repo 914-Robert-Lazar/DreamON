@@ -9,7 +9,7 @@ def keyword_extraction_spacy(text,model):
     return {
         "Symbol": [ent.text for ent in doc.ents if ent.label_ in ["PERSON", "LOC", "ORG", "NORP", "FAC","EVENT", "WORK_OF_ART"]],
         "Character": [ent.text for ent in doc.ents if ent.label_ == "PERSON"],
-        "Emotion": extract_emotions(text,emotion_lexicon),
+        "Emotion": extract_emotions(text,emotion_lexicon,model),
         "Action": [token.lemma_ for token in doc if token.pos_ == "VERB"],
         "Setting": [ent.text for ent in doc.ents if ent.label_ in ["GPE", "LOC","FAC"]]
     }

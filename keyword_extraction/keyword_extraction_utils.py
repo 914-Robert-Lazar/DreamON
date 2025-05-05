@@ -9,8 +9,8 @@ def load_nrc_lexicon(path='NRC-Emotion-Lexicon-Wordlevel-v0.92.txt'):
                 emotion_map[emotion].add(word)
     return emotion_map
 
-def extract_emotions(text, lexicon):
-    doc = nlp(text.lower())
+def extract_emotions(text, lexicon, model):
+    doc = model(text.lower())
     emotion_scores = defaultdict(int)
     for token in doc:
         for emotion, words in lexicon.items():
