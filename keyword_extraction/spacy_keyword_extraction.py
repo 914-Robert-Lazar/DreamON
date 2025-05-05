@@ -2,7 +2,7 @@ import spacy
 from keyword_extraction.keyword_extraction_utils import load_nrc_lexicon,extract_emotions
 
 emotion_lexicon = load_nrc_lexicon()
-model = spacy.load("en_core_web_sm")
+model_spacy = spacy.load("en_core_web_sm")
 
 def keyword_extraction_spacy(text,model):
     doc = model(text)

@@ -1,6 +1,6 @@
 from gliner import GLiNER
 
-model = GLiNER.from_pretrained("urchade/gliner_medium-v2.1")
+model_gliner = GLiNER.from_pretrained("urchade/gliner_medium-v2.1")
 
 def keyword_extraction_gliner(text,model):
     dream_labels = ["Symbol", "Emotion", "Character", "Setting", "Action"]

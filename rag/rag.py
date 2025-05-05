@@ -5,7 +5,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.document_loaders import DirectoryLoader, PDFMinerLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 
-def create_vector_db(directory_path: str) -> FAISS:
+def create_vector_db(directory_path):
     loader = DirectoryLoader(
         directory_path,
         glob="**/*.pdf",
@@ -34,7 +34,7 @@ def get_context(vector_db,keywords):
 
     return context
 
-def rag_pipeline(llm,query,keywords,vector_db,prompt) -> str:
+def rag_pipeline(llm,query,keywords,vector_db_folklore,vector_db_scientific,prompt) -> str:
     prompt_template = PromptTemplate(
         input_variables=["context", "query","keywords"],
         template=prompt
@@ -44,7 +44,9 @@ def rag_pipeline(llm,query,keywords,vector_db,prompt) -> str:
     for kw in list_keywords:
         keywords_string+=kw
         keywords_string+="\n"
-    context = get_context(vector_db,keywords)
+    context_folklore = get_context(vector_db_folklore,keywords)
+    context_scientific = get_context(vector_db_scientific, keywords)
+    context = "Folklore context: "+context_folklore + "\n" + "Scientific context:" + context_scientific
     formatted_prompt = prompt_template.format(context=context, query=query,keywords=keywords)
     response = llm(formatted_prompt)
     
