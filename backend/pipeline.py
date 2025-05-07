@@ -1,17 +1,17 @@
 from rag.rag import rag_pipeline,create_vector_db
 from keyword_extraction.gliner_keyword_extraction import keyword_extraction_gliner,model_gliner
-from keyword_extraction.spacy_keyword_extraction import keyword_extraction_spacy,model_spacy
+# from keyword_extraction.spacy_keyword_extraction import keyword_extraction_spacy,model_spacy
 from langchain_openai import ChatOpenAI
 
-pdf_path_folklore = "Folklore articles/"
-pdf_path_scientific = "Scientific articles/"
-prompt_path = "Prompt/idejonaprompt.txt"
+pdf_path_folklore = "../Folklore articles/"
+pdf_path_scientific = "../Scientific articles/"
 vector_db_folklore = create_vector_db(pdf_path_folklore)
 vector_db_scientific = create_vector_db(pdf_path_scientific)
+prompt_path = "../prompt/prompt.txt"
 def pipeline(query):    
     base_url = "http://localhost:1234/v1"
     api_key = "lm-studio"
-    llm_model = "gemma-3-1b-it"
+    llm_model = "meta-llama_-_meta-llama-3-8b"
 
     llm = ChatOpenAI(
         base_url=base_url,
@@ -19,7 +19,7 @@ def pipeline(query):
         temperature=0.4,
         model=llm_model
     )
-    keywords = keyword_extraction_spacy(query,model_spacy)
+    # keywords = keyword_extraction_spacy(query,model_spacy)
     keywords = keyword_extraction_gliner(query,model_gliner)
     prompt = ""
     with open(prompt_path,"r") as f:

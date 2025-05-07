@@ -1,19 +1,18 @@
 import streamlit as st
 import random
 import time
+import requests
 
 # To be changed for backend call
-def get_response():
-    response = random.choice(
-        [
-            "Hello there! How can I assist you today?",
-            "Hi, human! Is there anything I can help you with?",
-            "Do you need help?",
-        ]
-    )
-    for word in response.split():
-        yield word + " "
-        time.sleep(0.05)
+def get_response(prompt):
+    url = "http://localhost:8000/process_query"
+    payload = {"query": prompt}
+    try:
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        return response.json().get("content", "Sorry, I couldn't process your request.")
+    except requests.exceptions.RequestException as e:
+        return f"An error occurred: {e}"
 
 st.title("DreamON: a chatbot to explain your most precious dreams")
 
@@ -36,6 +35,6 @@ if prompt := st.chat_input("What did you dream last night?"):
 
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
-        response = st.write_stream(get_response())
+        response = st.write(get_response(prompt=prompt))
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})
