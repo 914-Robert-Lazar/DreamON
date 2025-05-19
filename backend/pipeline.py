@@ -42,7 +42,7 @@ def pipeline(query):
     output = rag_pipeline(llm,query,keywords,vector_db_folklore,vector_db_scientific,prompt)
     output_ok = False
     while not output_ok:
-        judge_output,output_ok = judge(llm_judge,output,judge_prompt)
+        output_ok, judge_output = judge(llm_judge,output,judge_prompt)
         if not output_ok:
             output = redo_rag_output(llm,judge_output,output,redo_rag_prompt)
     return output
