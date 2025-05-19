@@ -3,6 +3,7 @@ from keyword_extraction.gliner_keyword_extraction import keyword_extraction_glin
 # from keyword_extraction.spacy_keyword_extraction import keyword_extraction_spacy,model_spacy
 from langchain_openai import ChatOpenAI
 from judge.judge import judge
+from judge.redo_rag_output import redo_rag_output
 
 pdf_path_folklore = "../Folklore articles/"
 pdf_path_scientific = "../Scientific articles/"
@@ -41,8 +42,12 @@ def pipeline(query):
         redo_rag_prompt = f.readlines()
     output = rag_pipeline(llm,query,keywords,vector_db_folklore,vector_db_scientific,prompt)
     output_ok = False
-    while not output_ok:
+    count = 0
+    while not output_ok and count < 3:
         output_ok, judge_output = judge(llm_judge,output,judge_prompt)
         if not output_ok:
+            count +=1
             output = redo_rag_output(llm,judge_output,output,redo_rag_prompt)
+    if not output_ok:
+        output = "Could not generate response"
     return output
