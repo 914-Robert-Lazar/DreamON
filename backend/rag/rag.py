@@ -47,7 +47,7 @@ def get_context(vector_db, keywords):
     
     return context
 
-def rag_pipeline(llm,query,keywords,vector_db_folklore,vector_db_scientific,prompt) -> str:
+def rag_pipeline(llm, query, keywords, vector_db_folklore, vector_db_scientific, prompt, stream=False):
     if isinstance(prompt, list):
         prompt = "\n".join(prompt)  # Join list into a single string if necessary
     prompt_template = PromptTemplate(
@@ -55,19 +55,22 @@ def rag_pipeline(llm,query,keywords,vector_db_folklore,vector_db_scientific,prom
         template=prompt
     )
     list_keywords = [f"{key}: {val}" for key, val in keywords.items()]
-    print("List keywords: ",list_keywords)
+    print("List keywords: ", list_keywords)
     keywords_string = ""
     for kw in list_keywords:
-        keywords_string+=kw
-        keywords_string+="\n"
-    print("Keywords string: ",keywords_string)
-    context_folklore = get_context(vector_db_folklore,keywords)
+        keywords_string += kw
+        keywords_string += "\n"
+    print("Keywords string: ", keywords_string)
+    context_folklore = get_context(vector_db_folklore, keywords)
     context_scientific = get_context(vector_db_scientific, keywords)
-    context = "Folklore context: "+context_folklore + "\n" + "Scientific context:" + context_scientific
-    formatted_prompt = prompt_template.format(context=context, query=query,keywords=keywords)
+    context = "Folklore context: " + context_folklore + "\n" + "Scientific context:" + context_scientific
+    formatted_prompt = prompt_template.format(context=context, query=query, keywords=keywords)
     messages = [
         HumanMessage(content=formatted_prompt)
     ]
-    response = llm(messages)
     
-    return response
+    if stream:
+        return llm.stream(messages)
+    else:
+        response = llm(messages)
+        return response

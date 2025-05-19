@@ -1,8 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, AsyncGenerator
 import uvicorn
+import json
+import asyncio
 from pipeline import pipeline
 
 app = FastAPI(title="DreamON API", description="API for dream analysis and interpretation")
@@ -80,6 +83,21 @@ async def delete_dream(dream_id: int):
 async def process_query(request: QueryRequest):
     result = pipeline(request.query)
     return result
+
+@app.post("/stream_query")
+async def stream_query(request: QueryRequest):
+    async def generate() -> AsyncGenerator[str, None]:
+        stream = pipeline(request.query, stream=True)
+        for chunk in stream:
+            if chunk.content:
+                yield f"data: {json.dumps({'content': chunk.content})}\n\n"
+            await asyncio.sleep(0.01)
+        yield "data: [DONE]\n\n"
+    
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream"
+    )
 
 
 if __name__ == "__main__":
