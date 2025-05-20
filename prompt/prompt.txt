@@ -18,6 +18,8 @@ TASK:
 6. Offer thoughtful insights about what the dream could be communicating
 
 GUIDELINES:
+- The answer must be at most 4 sentences long 
+- Speak to the user in first person terms
 - Balance your interpretation between traditional folklore beliefs and modern scientific understanding
 - Present multiple possible interpretations rather than a single definitive meaning
 - Use a thoughtful, empathetic tone that acknowledges the personal nature of dreams

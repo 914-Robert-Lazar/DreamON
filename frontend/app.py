@@ -17,7 +17,7 @@ def get_response(prompt):
 
 # Streaming response function
 def get_streaming_response(prompt, placeholder):
-    url = "http://localhost:8000/stream_query"
+    url = "http://localhost:8000/process_query"
     payload = {"query": prompt}
     full_response = ""
     
@@ -64,6 +64,11 @@ if prompt := st.chat_input("What did you dream last night?"):
         st.markdown(prompt)    # Display assistant response in chat message container with streaming
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
-        response = get_streaming_response(prompt=prompt, placeholder=response_placeholder)
+        # Add a loading indicator while waiting for response
+        with st.spinner("Thinking..."):
+            # Use get_response without the placeholder parameter
+            response = get_response(prompt=prompt)
+            # Display the response
+            response_placeholder.markdown(response)
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": response})

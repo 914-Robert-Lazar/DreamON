@@ -12,11 +12,12 @@ def separate_first_line(response: str) -> tuple[str, str]:
         tuple[str, str]: A tuple containing (first_line, remaining_text)
     """
     lines = response.strip().split('\n', 1)
-    first_line = lines[0]
-    remaining_text = lines[1] if len(lines) > 1 else ""
+    first_line = lines[0].strip()  # Ensure we strip any whitespace
+    remaining_text = lines[1].strip() if len(lines) > 1 else ""
     return first_line, remaining_text
 
 def judge(llm_judge,output,judge_prompt):
+    judge_prompt = "\n".join(judge_prompt)
     judge_prompt_template = PromptTemplate(
         input_variables = ["output"],
         template = judge_prompt
@@ -26,8 +27,9 @@ def judge(llm_judge,output,judge_prompt):
         HumanMessage(content=formatted_prompt)
     ]
     response = llm_judge(messages)
-    first_line,reason = separate_first_line(response)
+    response_content = response.content
+    first_line,reason = separate_first_line(response_content)
     valid = False
-    if "Valid" in first_line:
+    if "invalid" not in first_line.lower():
         valid = True
     return valid,reason

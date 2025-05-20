@@ -2,6 +2,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage
 
 def redo_rag_output(llm,judge_output,output,redo_rag_prompt):
+    redo_rag_prompt = "\n".join(redo_rag_prompt)
     redo_rag_prompt_template = PromptTemplate(
         input_variables = ["judge_output","output"],
         template = redo_rag_prompt

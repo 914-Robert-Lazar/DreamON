@@ -10,13 +10,13 @@ pdf_path_scientific = "../Scientific articles/"
 vector_db_folklore = create_vector_db(pdf_path_folklore)
 vector_db_scientific = create_vector_db(pdf_path_scientific)
 prompt_path = "../prompt/prompt.txt"
-judge_prompt_path = "../prompt/judge.txt"
-redo_rag_prompt_path = "../prompt/redo_rag.txt"
+judge_prompt_path = "../prompt/judge_prompt.txt"
+redo_rag_prompt_path = "../prompt/rerunprompt.txt"
 def pipeline(query, stream=False):    
     base_url = "http://localhost:1234/v1"
     api_key = "lm-studio"
     llm_model = "meta-llama_-_meta-llama-3-8b"
-    llm_model_judge = "gemma-3-1b-it-GGUF/gemma-3-1b-it-Q4_K_M.gguf"
+    llm_model_judge = "gemma-3-1b-it"
     llm = ChatOpenAI(
         base_url=base_url,
         api_key=api_key,
@@ -45,18 +45,20 @@ def pipeline(query, stream=False):
     with open(redo_rag_prompt_path,"r") as f:
         redo_rag_prompt = f.readlines()
     
-    if stream:
-        return rag_pipeline(llm, query, keywords, vector_db_folklore, vector_db_scientific, prompt, stream=True)
-    else:
-        output = rag_pipeline(llm, query, keywords, vector_db_folklore, vector_db_scientific, prompt)
-        output_ok = False
-        count = 0
-        while not output_ok and count < 3:
-            output_ok, judge_output = judge(llm_judge, output, judge_prompt)
-            if not output_ok:
-                count += 1
-                output = redo_rag_output(llm, judge_output, output, redo_rag_prompt)
+    # if stream:
+    #     return rag_pipeline(llm, query, keywords, vector_db_folklore, vector_db_scientific, prompt, stream=True)
+    # else:
+    output = rag_pipeline(llm, query, keywords, vector_db_folklore, vector_db_scientific, prompt)
+    output_ok = False
+    count = 0
+    while not output_ok and count < 3:
+        output_ok, judge_output = judge(llm_judge, output, judge_prompt)
+        print("Judge ok?: ", output_ok)
+        print("Judge output: ", judge_output)
         if not output_ok:
-            output = "Could not generate response"
-        return output
-        return output
+            count += 1
+            output = redo_rag_output(llm, judge_output, output, redo_rag_prompt)
+    if not output_ok:
+        output = "Could not generate response"
+    print("Final output: ", output)
+    return output

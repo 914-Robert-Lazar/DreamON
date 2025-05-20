@@ -16,8 +16,9 @@ def create_vector_db(directory_path):
     documents = loader.load()
     
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=1500,
-        chunk_overlap=200
+        #250 - 50
+        chunk_size=200,
+        chunk_overlap=30
     )
     texts = text_splitter.split_documents(documents)
     
@@ -29,21 +30,82 @@ def create_vector_db(directory_path):
     vector_db = FAISS.from_documents(texts, embeddings)
     return vector_db
 
-def get_context(vector_db, keywords):
+# def get_context(vector_db, keywords):
+#     context = ""
+#     for key, values in keywords.items():
+#         # If values is a list, process each value
+#         if isinstance(values, list):
+#             for value in values:
+#                 if value:  # Check if value is not empty
+#                     docs = vector_db.similarity_search(value, 1)
+#                     for doc in docs:
+#                         context += f"\n\n{doc.page_content}"
+#         # If values is a string or another type, process it directly
+#         elif values:
+#             docs = vector_db.similarity_search(str(values), 1)
+#             for doc in docs:
+#                 context += f"\n\n{doc.page_content}"
+    
+#     return context
+
+def get_context(vector_db, keywords, max_sentences=3):
+    """
+    Get context from vector database with a maximum of 3 sentences per context type.
+    
+    Args:
+        vector_db: The vector database to search
+        keywords: Dictionary of keywords
+        max_sentences: Maximum number of sentences to include (default: 3)
+    
+    Returns:
+        str: Retrieved context limited to max_sentences
+    """
     context = ""
+    total_sentences = 0
+    
     for key, values in keywords.items():
+        # If we've already hit our sentence limit, break
+        if total_sentences >= max_sentences:
+            break
+            
         # If values is a list, process each value
         if isinstance(values, list):
             for value in values:
-                if value:  # Check if value is not empty
+                if value and total_sentences < max_sentences:  # Check if value is not empty
                     docs = vector_db.similarity_search(value, 1)
                     for doc in docs:
-                        context += f"\n\n{doc.page_content}"
+                        # Split the document content into sentences
+                        # Simple split by period followed by space or end of string
+                        sentences = [s.strip() + "." for s in doc.page_content.split(".") if s.strip()]
+                        
+                        # Take only enough sentences to reach our max
+                        sentences_to_add = sentences[:max_sentences - total_sentences]
+                        
+                        if sentences_to_add:
+                            context += f"\n\n{' '.join(sentences_to_add)}"
+                            total_sentences += len(sentences_to_add)
+                        
+                        # If we've reached our limit, stop adding more
+                        if total_sentences >= max_sentences:
+                            break
+        
         # If values is a string or another type, process it directly
-        elif values:
-            docs = vector_db.similarity_search(str(values), 2)
+        elif values and total_sentences < max_sentences:
+            docs = vector_db.similarity_search(str(values), 1)  # Reduced from 2 to 1 for brevity
             for doc in docs:
-                context += f"\n\n{doc.page_content}"
+                # Split into sentences
+                sentences = [s.strip() + "." for s in doc.page_content.split(".") if s.strip()]
+                
+                # Take only enough sentences to reach our max
+                sentences_to_add = sentences[:max_sentences - total_sentences]
+                
+                if sentences_to_add:
+                    context += f"\n\n{' '.join(sentences_to_add)}"
+                    total_sentences += len(sentences_to_add)
+                
+                # If we've reached our limit, stop adding more
+                if total_sentences >= max_sentences:
+                    break
     
     return context
 
